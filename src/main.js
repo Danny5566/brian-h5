@@ -9,7 +9,9 @@ import {
   NavBar,
   Avatar,
   Swiper,
-  Scroller
+  Scroller,
+  ActionSheet,
+  Dialog
 } from "@nutui/nutui";
 import "lib-flexible";
 import "normalize.css";
@@ -25,6 +27,8 @@ NavBar.install(Vue);
 Avatar.install(Vue);
 Swiper.install(Vue);
 Scroller.install(Vue);
+ActionSheet.install(Vue);
+Dialog.install(Vue);
 
 Vue.config.productionTip = false;
 

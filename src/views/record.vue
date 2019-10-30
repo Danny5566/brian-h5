@@ -1,11 +1,6 @@
 <template>
   <div class="main">
-    <nut-navbar class="navbar" :leftShow="false">
-      会议记录
-      <a slot="more-icon">
-        <nut-avatar></nut-avatar>
-      </a>
-    </nut-navbar>
+    <lcTitle></lcTitle>
     <div class="contain">
       <div class="tab">
         <div
@@ -33,15 +28,10 @@
             <div slot="list" class="nut-vert-list-panel">
               <div
                 class="nut-vert-list-item"
-                v-for="(item, index) of listData1"
+                v-for="(item, index) of currentData"
                 :key="index"
               >
-                <dl class="nut-scroller-item-info">
-                  <dt>
-                    防水升级版 蓝牙音箱 低音炮 IPX7设计 户外便携音响 迷你小音
-                  </dt>
-                  <dd>2018-02-25</dd>
-                </dl>
+                <card :data="item"></card>
               </div>
             </div>
           </nut-scroller>
@@ -63,7 +53,11 @@
 </template>
 
 <script>
+import card from "_/card";
+import lcTitle from "_/title.vue";
+
 export default {
+  components: { card, lcTitle },
   data() {
     return {
       tabData: [
@@ -77,8 +71,7 @@ export default {
         }
       ],
       activeItem: 1,
-      listData1: new Array(20),
-      currentData: [],
+      currentData: new Array(20),
       historyData: []
     };
   },
