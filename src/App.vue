@@ -30,6 +30,7 @@
     flex-direction: column;
     flex: 1;
     padding-top: 6px;
+    overflow: hidden;
     .card {
       border-bottom: 6px solid #f6f8fb;
       padding: 6px 16px;
@@ -48,5 +49,11 @@
       width: 100%;
     }
   }
+}
+/**
+  修改 会议预约中 nut-input 字体颜色
+*/
+.reserve .nut-input input {
+  color: #666666;
 }
 </style>

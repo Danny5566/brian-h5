@@ -1,11 +1,35 @@
 <template>
-  <div class="user-list">
-    <div class="item" v-for="item in showList" :key="item.uid">
+  <div
+    :class="{ 'user-list': true, 'wrap-item': type === 'edit' ? true : false }"
+  >
+    <div
+      :class="{
+        item: true,
+        label: type !== 'edit' && index === 0 ? true : false
+      }"
+      v-for="(item, index) in showList"
+      :key="item.uid"
+    >
       <div v-if="!item.displayPhoto" class="avatar" :style="avatarSelect"></div>
-      <div v-else class="avatar">正常头像</div>
+      <div
+        v-if="item.displayPhoto"
+        class="avatar"
+        :style="{
+          backgroundImage: `url(http://oss.imbcloud.cn/image/${item.displayPhoto})`
+        }"
+      ></div>
       <div class="name">{{ item.name }}</div>
+      <div v-if="type === 'edit'" class="delete" @click="deleteItem(item.uid)">
+        <span class="iconfont icon-jian"></span>
+      </div>
     </div>
-    <div v-if="showMore" class="showMore">
+    <div v-if="type === 'edit'" class="item" @click="addUser('user')">
+      <div class="avatar add-icon">
+        <span class="iconfont icon-add"></span>
+      </div>
+      <div class="add-name name">添加人员</div>
+    </div>
+    <div v-if="showMore" class="showMore" @click="more">
       <span class="iconfont icon-right"></span>
     </div>
   </div>
@@ -14,7 +38,7 @@
 <script>
 export default {
   name: "userList",
-  props: ["data"],
+  props: ["data", "type"],
   data() {
     return {
       showList: [],
@@ -25,14 +49,48 @@ export default {
       }
     };
   },
-  mounted() {
-    // 通过页面宽度和item宽度计算显示用户数量
-    this.showList = JSON.parse(JSON.stringify(this.data));
-    let length = Math.floor((document.body.offsetWidth - 12) / 62);
-    if (this.showList.length > length) {
-      this.showMore = true;
-      this.showList.length = length;
+  watch: {
+    data: function() {
+      this.dealData();
     }
+  },
+  methods: {
+    dealData() {
+      if (this.data.length > 0) {
+        this.showList = JSON.parse(JSON.stringify(this.data));
+        let length = Math.floor((document.body.offsetWidth - 12) / 62);
+        if (this.showList.length > length && this.type !== "edit") {
+          this.showMore = true;
+          this.showList.length = length;
+        }
+      } else {
+        this.showList = this.data;
+        this.showMore = false;
+      }
+    },
+    deleteItem(id) {
+      this.$emit("sendRemoveUser", id);
+    },
+    addUser(type) {
+      this.$router.push({
+        name: "users",
+        params: {
+          type: type
+        }
+      });
+    },
+    more() {
+      this.$router.push({
+        name: "participant",
+        params: {
+          users: this.data
+        }
+      });
+    }
+  },
+  mounted() {
+    // 通过页面宽度和item宽度计算显示用户数量, 编辑状态显示全部数据
+    this.dealData();
   }
 };
 </script>
@@ -54,8 +112,19 @@ export default {
       font-size: 12px;
       padding-top: 6px;
     }
+    .delete {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      color: #d63f3f;
+      padding: 6px;
+      .iconfont {
+        background: #ffffff;
+        border-radius: 100%;
+      }
+    }
   }
-  .item:nth-child(1)::before {
+  .label::before {
     content: "主持人";
     position: absolute;
     font-size: 10px;
@@ -65,12 +134,39 @@ export default {
   .avatar {
     width: 52px;
     height: 52px;
+    // background: #67aee8;
     background-repeat: no-repeat;
     background-size: 100% 100%;
+    border-radius: 100%;
+    // &:last-child {
+    //   background-color: #ffffff;
+    // }
   }
   .showMore {
     display: flex;
     align-items: center;
+  }
+}
+.wrap-item {
+  flex-wrap: wrap;
+  .item {
+    margin-bottom: 6px;
+    .add-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #d0d0d0;
+      .icon-add {
+        padding: 10px 12px;
+        border: 1px dashed #d0d0d0;
+        border-radius: 100%;
+        font-size: 28px;
+        color: #d0d0d0;
+      }
+    }
+    .add-name {
+      color: #d0d0d0;
+    }
   }
 }
 </style>

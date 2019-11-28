@@ -6,6 +6,7 @@
     class="navbar"
   >
     {{ data.title }}
+    <span v-if="userLength">({{ userLength }})</span>
     <a v-if="data.avatar" slot="more-icon">
       <nut-avatar
         @activeAvatar="showAbout"
@@ -19,6 +20,7 @@
 <script>
 export default {
   name: "lc-title",
+  props: ["userLength"],
   data() {
     return {
       data: {}
@@ -30,6 +32,8 @@ export default {
     this.data.share = this.$store.state.app.share;
     this.data.back = this.$store.state.app.back;
     this.data.lastRoute = this.$store.state.app.lastRoute;
+    this.data.curRoute = this.$store.state.app.curRoute;
+    this.data.curName = this.$store.state.app.curName;
   },
   methods: {
     showAbout() {
@@ -38,7 +42,15 @@ export default {
       });
     },
     back() {
-      this.$router.push({ name: this.data.lastRoute });
+      // 强制修改返回路径唯一
+      if (this.data.curName === "reserve") {
+        // 会议预约强制返回到会议记录
+        this.$router.push({ name: "record" });
+      } else if (this.data.curName === "detail") {
+        this.$router.push({ name: "record" });
+      } else {
+        this.$router.push(this.data.lastRoute);
+      }
     },
     share() {
       this.$emit("sendShare", true);

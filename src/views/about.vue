@@ -60,12 +60,15 @@ export default {
           store.commit("setToken", "");
           this.close(); //关闭对话框
           router.push({ name: "login" });
-          this.$toast.text("当前账号已退出", {
-            center: false
-          });
+          this.$toast.text("当前账号已退出");
         }
       });
     }
+  },
+  mounted() {
+    this.data.displayPhoto = this.$store.state.user.displayPhoto;
+    this.data.id = this.$store.state.user.userId;
+    this.data.name = this.$store.state.user.userName;
   }
 };
 </script>

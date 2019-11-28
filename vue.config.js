@@ -4,6 +4,7 @@ const resolve = dir => {
 };
 
 module.exports = {
+  outputDir: "h5",
   chainWebpack: config => {
     config.resolve.alias
       .set("@", resolve("src"))

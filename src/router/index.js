@@ -16,7 +16,18 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const token = getToken();
+  // share 页面不校验token
+  if (to.name === "share" || to.name === "participant") {
+    next();
+    return;
+  }
   if (!token && to.name !== LOGIN_NAME) {
+    // detail 页面分享给没有token的人的时候处理为 share
+    if (to.name === "detail") {
+      let path = to.path.replace("detail", "share");
+      next({ path: path });
+      return false;
+    }
     next({ name: LOGIN_NAME });
   } else if (!token && to.name === LOGIN_NAME) {
     next();
@@ -31,9 +42,11 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to, from) => {
   // 标题基本信息
-  // console.log("to.name", to.name, "from.name", from.name);
-  store.commit("setLastRoute", from ? from.name : "");
-  store.commit("setCurRoute", to.name);
+  // console.log("to.name", to, "from.name", from);
+  // 因为有的页面需要通过路由传参，所以使用path跳转
+  store.commit("setLastRoute", from ? from.path : "");
+  store.commit("setCurName", to.name);
+  store.commit("setCurRoute", to.path);
   store.commit("setTitle", to.meta.title);
   store.commit("setAvatar", to.meta.avatar || false);
   store.commit("setShare", to.meta.share || false);

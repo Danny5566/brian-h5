@@ -44,15 +44,11 @@ export default {
   methods: {
     loginIn() {
       if (!this.loginForm.userName) {
-        this.$toast.text("请输入账户", {
-          center: false
-        });
+        this.$toast.text("请输入账户");
         return false;
       }
       if (!this.loginForm.password) {
-        this.$toast.text("请输入密码", {
-          center: false
-        });
+        this.$toast.text("请输入密码");
         return false;
       }
       login(this.loginForm).then(res => {
@@ -65,9 +61,7 @@ export default {
             name: "record"
           });
         } else {
-          this.$toast.text(res.data.msg, {
-            center: false
-          });
+          this.$toast.text(res.data.msg);
         }
       });
     }

@@ -1,32 +1,33 @@
 <template>
   <div class="main">
-    <!-- <nut-navbar class="navbar" :leftShow="false">
-      会议详情
-      <a slot="more-icon" @click="isVisible = true">分享</a>
-    </nut-navbar>-->
     <lcTitle @sendShare="openShare"></lcTitle>
-    <div class="contain reservation">
-      <div>
-        <div class="label">会议名称</div>
-        <div>会议名称1</div>
-      </div>
-      <div>
-        <div class="label">会议类型</div>
-        <div>视频会议</div>
-      </div>
-      <div>
-        <div class="label">会议时间</div>
-        <div>2019/01/01(周五) 19:30-21:30</div>
-      </div>
-      <div class="users">
-        <div class="label">参会人员(18)</div>
-        <userList :data="data.participantInfoDOS"></userList>
-      </div>
-      <div class="remark">
-        <div class="label">会议备注</div>
-        <div class="remark-content">
-          会议备注会议备注会议备注会议备注会议备注会议备会议备
-          注会议备注会议备注会议备注会议备注会议备注会议会议备 备注会。
+    <div class="contain" ref="wrapper">
+      <div class="reservation">
+        <div>
+          <div class="label">会议名称</div>
+          <div>{{ data.meetingSubject }}</div>
+        </div>
+        <div>
+          <div class="label">会议类型</div>
+          <div>{{ data.meetingType | formatType }}</div>
+        </div>
+        <div>
+          <div class="label">开始时间</div>
+          <div>{{ data.startTime | formatDate }}</div>
+        </div>
+        <div>
+          <div class="label">结束时间</div>
+          <div>{{ data.endTime | formatDate }}</div>
+        </div>
+        <div class="users">
+          <div class="label">
+            参会人员({{ data.length ? data.participantInfoDOS.length : 0 }})
+          </div>
+          <userList :data="data.participantInfoDOS"></userList>
+        </div>
+        <div class="remark">
+          <div class="label">会议备注</div>
+          <div class="remark-content">{{ data.remark || "" }}</div>
         </div>
       </div>
     </div>
@@ -37,29 +38,38 @@
           color="#FFFFFF"
           :block="true"
           shape="circle"
-          @click="cancelMeeting"
+          @click="cancelMeeting(meetingId)"
           >取消预约</nut-button
         >
       </div>
       <div>
-        <nut-button type="primary" :block="true" shape="circle"
+        <nut-button
+          type="primary"
+          :block="true"
+          shape="circle"
+          @click="startMeeting"
           >立即开会</nut-button
         >
       </div>
     </div>
     <nut-actionsheet :isVisible="isVisible" @close="switchActionSheet">
       <div slot="custom" class="custom-wrap">
-        <span class="iconfont icon-weixin"></span>
+        <span class="iconfont icon-weixin" @click="wxShare"></span>
         <span class="iconfont icon-dingding"></span>
-        <span class="iconfont icon-link"></span>
+        <span class="iconfont icon-link" @click="copy"></span>
       </div>
     </nut-actionsheet>
   </div>
 </template>
 
 <script>
+import Bscroll from "better-scroll";
+
 import userList from "_/user-list.vue";
 import lcTitle from "_/title.vue";
+import { getWeek } from "@/libs/tools";
+
+import { getMeetInfo, delMeet, startNowMeeting } from "@/api/data";
 
 export default {
   components: { userList, lcTitle },
@@ -74,25 +84,87 @@ export default {
         meetingState: 0,
         meetingType: 0,
         participantInfoDOS: [
-          { uid: 1, name: "盖伦", displayPhoto: "" },
-          { uid: 2, name: "艾希", displayPhoto: "" },
-          { uid: 3, name: "亚瑟", displayPhoto: "" },
-          { uid: 4, name: "嘉文四世", displayPhoto: "" },
-          { uid: 5, name: "亚索", displayPhoto: "" },
-          { uid: 6, name: "琴女", displayPhoto: "" }
+          // { uid: 1, name: "盖伦", displayPhoto: "" },
+          // { uid: 2, name: "艾希", displayPhoto: "" },
+          // { uid: 3, name: "亚瑟", displayPhoto: "" },
+          // { uid: 4, name: "嘉文四世", displayPhoto: "" },
+          // { uid: 5, name: "亚索", displayPhoto: "" },
+          // { uid: 6, name: "琴女", displayPhoto: "" }
         ]
       },
-      isVisible: false
+      isVisible: false,
+      meetingId: ""
     };
   },
+  created() {
+    this.meetingId = this.$route.params.id;
+  },
+  filters: {
+    formatDate: function(val) {
+      return val ? getWeek(val) : "";
+    },
+    formatType: function(val) {
+      return val ? "语音会议" : "视频会议";
+    }
+  },
   methods: {
-    cancelMeeting() {
+    copy() {
+      let that = this;
+      let uri = location.href.replace("detail", "share");
+      this.$copyText(uri).then(
+        function() {
+          that.$toast.text("复制成功！");
+          that.isVisible = false;
+        },
+        function(e) {
+          that.$toast.text(`复制失败: ${e}`);
+        }
+      );
+    },
+    wxShare() {
+      let that = this; // 保存vue对象
+      /* eslint-disable no-undef */
+      wx.ready(function() {
+        //需在用户可能点击分享按钮前就先调用
+        const share = {
+          title: that.data.meetingSubject, // 分享标题
+          desc: "", // 分享描述
+          link: "", // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+          imgUrl: "", // 分享图标
+          success: function() {
+            // 设置成功
+          }
+        };
+        wx.updateAppMessageShareData(share);
+      });
+      console.log("微信分享");
+    },
+    startMeeting() {
+      let data = {
+        meetingId: this.meetingId
+      };
+      startNowMeeting(data).then(res => {
+        if (res.data.code === 200) {
+          console.log("立即开会，跳转app");
+        } else {
+          this.$toast.text(res.data.msg);
+        }
+      });
+    },
+    cancelMeeting(meetingId) {
+      let that = this;
       this.$dialog({
         title: "取消预约",
         content: "你正在取消会议操作，确定取消会议吗？",
         onOkBtn() {
           //确定按钮点击事件
-          alert("okBtn");
+          delMeet(meetingId).then(res => {
+            if (res.data.code === 200) {
+              that.$router.push({ name: "record" });
+            } else {
+              that.$toast.text(res.data.msg);
+            }
+          });
           this.close(); //关闭对话框
         }
       });
@@ -102,7 +174,44 @@ export default {
     },
     openShare() {
       this.isVisible = true;
+    },
+    getInfo(param) {
+      getMeetInfo(param).then(res => {
+        if (res.data.code === 200) {
+          this.data = res.data.data;
+          let host = {
+            uid: res.data.data.hostId,
+            tel: res.data.data.hostTel,
+            name: res.data.data.hostName,
+            displayPhoto: res.data.data.hostDisplayPhoto
+          };
+          this.data.participantInfoDOS.unshift(host);
+        } else {
+          this.data = {};
+        }
+      });
     }
+  },
+  mounted() {
+    // console.log("id", this.$router.params.id);
+    this.getInfo(this.meetingId);
+    this.$nextTick(() => {
+      this.scroll = new Bscroll(this.$refs.wrapper, {
+        click: true
+      });
+      // 生成微信分享链接
+      // eslint-disable-next-line no-undef
+      // wx.config({
+      //   debug: false, // 是否开启debug
+      //   appId: '',
+      //   timestamp: '',
+      //   nonceStr: '',
+      //   signature: '',
+      //   jsApiList: [
+      //     'updateAppMessageShareData' // 分享给朋友，新api
+      //   ]
+      // })
+    });
   }
 };
 </script>
@@ -119,6 +228,7 @@ export default {
         padding: 10px;
         border-radius: 4px;
         margin-top: 6px;
+        line-height: 1.5;
       }
     }
     .users {
@@ -127,7 +237,7 @@ export default {
         padding: 26px 0 0 0;
       }
     }
-    & > div {
+    & > div > div {
       padding: 9px 0;
       display: flex;
       color: #333333;

@@ -11,11 +11,15 @@ import {
   Swiper,
   Scroller,
   ActionSheet,
-  Dialog
+  Dialog,
+  DatePicker
 } from "@nutui/nutui";
+import VueClipboard from "vue-clipboard2";
 import "lib-flexible";
 import "normalize.css";
 import "@/assets/font/iconfont.css";
+
+Vue.use(VueClipboard);
 
 /**
  * nutui 按需引入
@@ -29,6 +33,7 @@ Swiper.install(Vue);
 Scroller.install(Vue);
 ActionSheet.install(Vue);
 Dialog.install(Vue);
+DatePicker.install(Vue);
 
 Vue.config.productionTip = false;
 

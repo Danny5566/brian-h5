@@ -4,7 +4,7 @@ import md5 from "crypto-js/md5";
 import hmacsha1 from "crypto-js/hmac-sha1";
 
 let date = new Date().getTime();
-let stringToString = `POST\n${date}\n/h5/user/login`;
+let stringToString = `POST\n${date}\n/user/login`;
 
 export const login = ({ userName, password }) => {
   // ZjMxMTM2MTdiYWQyYTQxNTcyODk2NmQwNDM2ZWUwMDgxYmU1ZTVhZg==
@@ -17,6 +17,7 @@ export const login = ({ userName, password }) => {
   return axios.request({
     url: `/user/h5/login/${userName}`,
     method: "post",
+    data: {},
     headers: {
       Authorization: sign,
       Time: date
