@@ -4,6 +4,7 @@ const resolve = dir => {
 };
 
 module.exports = {
+  publicPath: "/h5",
   outputDir: "h5",
   chainWebpack: config => {
     config.resolve.alias

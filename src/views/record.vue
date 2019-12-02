@@ -16,6 +16,7 @@
         @slideChangeEnd="slideChangeEnd"
         class="swiper"
         direction="horizontal"
+        :canDragging="false"
         ref="swiper"
       >
         <!-- 当前会议 -->
@@ -33,7 +34,7 @@
               >
                 <card :data="item"></card>
               </div>
-              <loading v-show="down" msg="加载更多"></loading>
+              <!-- <loading v-show="down" msg="加载更多"></loading> -->
               <div v-if="currentData.length && curEnd" class="tips">
                 —— 我是有底线的 ——
               </div>
@@ -55,7 +56,7 @@
               >
                 <card :data="item"></card>
               </div>
-              <loading v-show="down" msg="加载更多"></loading>
+              <!-- <loading v-show="down" msg="加载更多"></loading> -->
               <div v-if="historyData.length && historyEnd" class="tips">
                 —— 我是有底线的 ——
               </div>
@@ -81,7 +82,7 @@ import card from "_/card";
 import lcTitle from "_/title.vue";
 import loading from "_/loading.vue";
 
-import { getH5MeetingPage } from "@/api/data";
+import { getH5MeetingPage, getPocUserInfo } from "@/api/data";
 
 export default {
   components: { card, lcTitle, loading },
@@ -169,9 +170,24 @@ export default {
         }
         this.scroll2.refresh();
       });
+    },
+    getHost() {
+      getPocUserInfo().then(res => {
+        if (res.data.code === 200) {
+          this.host = res.data.data;
+          this.$store.commit("setImg", res.data.data.displayPhoto);
+          this.$store.commit("setUserName", res.data.data.name);
+          this.$store.commit("setSelectHost", [res.data.data]);
+        } else {
+          this.$toast.text(res.data.msg);
+        }
+      });
     }
   },
   mounted() {
+    if (!this.$store.state.app.selectHost.length) {
+      this.getHost();
+    }
     this.getPage();
     this.getHisPage();
     this.$nextTick(() => {
@@ -260,7 +276,7 @@ export default {
 <style lang="scss" scoped>
 .tab {
   display: flex;
-  height: 32px;
+  height: 38px;
   align-items: flex-end;
   border-bottom: 1px solid #f1f3f5;
   font-size: 15px;

@@ -2,6 +2,7 @@
   <nut-navbar
     :leftShow="data.back"
     :rightShow="data.avatar || data.share"
+    style="height: 50px; line-height: 50px;"
     @on-click-back="back"
     class="navbar"
   >
@@ -10,7 +11,12 @@
     <a v-if="data.avatar" slot="more-icon">
       <nut-avatar
         @activeAvatar="showAbout"
-        bgImage="~@/assets/images/avatar-select.png"
+        bgIcon
+        :bgImage="
+          this.$store.state.user.avatarImgPath
+            ? this.$store.state.user.avatarImgPath
+            : require('@/assets/images/avatar-select.png')
+        "
       ></nut-avatar>
     </a>
     <a v-if="data.share" slot="more-icon" @click="share">分享</a>

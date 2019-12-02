@@ -1,6 +1,8 @@
 <template>
   <div
     :class="{ 'user-list': true, 'wrap-item': type === 'edit' ? true : false }"
+    ref="item"
+    @click="more"
   >
     <div
       :class="{
@@ -9,6 +11,7 @@
       }"
       v-for="(item, index) in showList"
       :key="item.uid"
+      ref="smallitem"
     >
       <div v-if="!item.displayPhoto" class="avatar" :style="avatarSelect"></div>
       <div
@@ -29,7 +32,7 @@
       </div>
       <div class="add-name name">添加人员</div>
     </div>
-    <div v-if="showMore" class="showMore" @click="more">
+    <div v-if="showMore" class="showMore">
       <span class="iconfont icon-right"></span>
     </div>
   </div>
@@ -58,7 +61,7 @@ export default {
     dealData() {
       if (this.data.length > 0) {
         this.showList = JSON.parse(JSON.stringify(this.data));
-        let length = Math.floor((document.body.offsetWidth - 12) / 62);
+        let length = Math.floor(this.$refs.item.clientWidth / 60);
         if (this.showList.length > length && this.type !== "edit") {
           this.showMore = true;
           this.showList.length = length;
@@ -80,12 +83,14 @@ export default {
       });
     },
     more() {
-      this.$router.push({
-        name: "participant",
-        params: {
-          users: this.data
-        }
-      });
+      if (this.showMore) {
+        this.$router.push({
+          name: "participant",
+          params: {
+            users: this.data
+          }
+        });
+      }
     }
   },
   mounted() {

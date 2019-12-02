@@ -1,15 +1,29 @@
 <template>
-  <div id="app">
+  <div id="app" :style="{ height: height }">
     <router-view />
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      height: ""
+    };
+  },
+  mounted() {
+    this.height = window.innerHeight + "px";
+  }
+};
+</script>
 
 <style lang="scss">
 #app {
   -webkit-tap-highlight-color: transparent;
 }
 .main {
-  height: 100vh;
+  height: 100%;
+  min-height: "-webkit-fill-available";
   display: flex;
   flex-direction: column;
   font-size: 14px;

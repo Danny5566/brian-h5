@@ -9,7 +9,7 @@ Vue.use(VueRouter);
 const LOGIN_NAME = "login";
 
 const router = new VueRouter({
-  mode: "history",
+  // mode: "history",
   base: "/h5",
   routes
 });

@@ -9,7 +9,7 @@ export default {
     access: ""
   },
   mutations: {
-    setAvatar(state, avatarPath) {
+    setImg(state, avatarPath) {
       state.avatarImgPath = avatarPath;
     },
     setUserId(state, id) {

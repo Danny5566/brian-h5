@@ -52,11 +52,13 @@
 
 <script>
 import Bscroll from "better-scroll";
+import CallApp from "callapp-lib";
+import * as dd from "dingtalk-jsapi";
 
 import userList from "_/user-list.vue";
 import { getWeek } from "@/libs/tools";
 
-import { getMeetInfo } from "@/api/data";
+import { getMeetInfo, getSign } from "@/api/data";
 
 export default {
   components: { userList },
@@ -73,7 +75,27 @@ export default {
         ]
       },
       basicClass: "bg-basic",
-      activeClass: ""
+      activeClass: "",
+      // 当前网页环境
+      environment: {
+        isAndroid: Boolean(navigator.userAgent.match(/android/gi)),
+        isIphone: Boolean(navigator.userAgent.match(/iphone|ipod/gi)),
+        isIpad: Boolean(navigator.userAgent.match(/ipad/gi)),
+        isWeixin: Boolean(navigator.userAgent.match(/MicroMessenger/gi)),
+        isAli: Boolean(navigator.userAgent.match(/AlipayClient/gi)),
+        isPhone: Boolean(
+          /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
+        )
+      },
+      option: {
+        scheme: {
+          protocol: "ykshortvideo"
+        },
+        appstore: "",
+        yingyongbao: "",
+        fallback: "https://baidu.com",
+        timeout: 2000
+      }
     };
   },
   filters: {
@@ -85,10 +107,100 @@ export default {
     }
   },
   methods: {
+    ddShare() {
+      let that = this;
+      /* eslint-disable no-undef */
+      if (dd.env.platform === "notInDingTalk") {
+        // console.log("当前非钉钉环境");
+        return false;
+      }
+      dd.ready(function() {
+        dd.biz.navigation.setRight({
+          show: true, //控制按钮显示， true 显示， false 隐藏， 默认true
+          control: true, //是否控制点击事件，true 控制，false 不控制， 默认false
+          text: "", //控制显示文本，空字符串表示显示默认文本
+          onSuccess: function() {
+            //如果control为true，则onSuccess将在发生按钮点击事件被回调
+            dd.biz.util.share({
+              type: 0, //分享类型，0:全部组件 默认； 1:只能分享到钉钉；2:不能分享，只有刷新按钮
+              url: location.href,
+              content: that.data.remark,
+              title: that.data.meetingSubject,
+              image: "",
+              onSuccess: function() {
+                //onSuccess将在分享完成之后回调
+                /**/
+              },
+              onFail: function(err) {
+                this.$toast.text(err);
+              }
+            });
+          },
+          onFail: function(err) {
+            this.$toast.text(err);
+          }
+        });
+      });
+    },
+    wxShare() {
+      let that = this; // 保存vue对象
+      /* eslint-disable no-undef */
+      let obj = { url: location.href.split("#")[0] };
+      if (!this.environment.isWeixin) {
+        // console.log("当前非微信环境");
+        return false;
+      }
+      // let obj = { url: "http://dev.imbcloud.cn/h5/#/share/T9UWbBLPr" };
+      getSign(obj).then(res => {
+        if (res.data.code === 200) {
+          wx.config({
+            debug: false, // 是否开启debug
+            appId: res.data.data.appId,
+            timestamp: res.data.data.timestamp,
+            nonceStr: res.data.data.nonceStr,
+            signature: res.data.data.signature,
+            jsApiList: [
+              "updateAppMessageShareData",
+              "onMenuShareAppMessage" // 分享给朋友，新api
+            ]
+          });
+
+          wx.ready(() => {
+            //需在用户可能点击分享按钮前就先调用
+            const share = {
+              title: that.data.meetingSubject, // 分享标题
+              desc: that.data.remark, // 分享描述
+              link:
+                location.href.split("#")[0] + "#" + location.href.split("#")[1], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+              imgUrl: "", // 分享图标
+              success: function() {
+                // 设置成功
+              }
+            };
+            wx.onMenuShareAppMessage(share);
+          });
+
+          wx.error(function(res) {
+            that.$toast.text(res);
+            // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+          });
+        } else {
+          this.$toast.text(res.data.msg);
+        }
+      });
+    },
     join() {
       if (!this.data.meetingSubject) {
         return false;
       }
+      const lib = new CallApp(this.option);
+      lib.open({
+        path: "",
+        param: "",
+        callback: function() {
+          window.location.href = "https://ai.imbcloud.cn/h5";
+        }
+      });
     },
     getData(id) {
       getMeetInfo(id).then(res => {
@@ -127,6 +239,8 @@ export default {
   },
   mounted() {
     this.getData(this.$route.params.id);
+    this.wxShare();
+    this.ddShare();
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {
         click: true

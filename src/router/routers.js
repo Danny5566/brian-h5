@@ -25,7 +25,7 @@ export default [
     meta: {
       title: "预约详情",
       back: true,
-      share: true
+      share: false
     },
     component: () => import("@/views/detail.vue")
   },

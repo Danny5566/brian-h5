@@ -55,8 +55,7 @@ export default {
         if (res.data.code === 200) {
           // 登录成功
           this.$store.commit("setToken", res.data.data.token);
-          this.$store.commit("setUserId", res.data.data.userId);
-          this.$store.commit("setUserName", res.data.data.userName);
+          this.$store.commit("setUserId", res.data.data.userName);
           this.$router.push({
             name: "record"
           });

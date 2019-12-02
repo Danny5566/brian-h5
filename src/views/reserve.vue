@@ -126,7 +126,7 @@ import lcTitle from "_/title.vue";
 import userList from "_/user-list.vue";
 import { parseTime, getWeek, getDateDiff } from "@/libs/tools";
 // eslint-disable-next-line no-unused-vars
-import { addMeeting, getPocUserInfo } from "@/api/data";
+import { addMeeting } from "@/api/data";
 
 export default {
   components: { lcTitle, userList },
@@ -210,12 +210,17 @@ export default {
       this.formData.meetingType = val;
     },
     showTime(val) {
+      // 取消所有input的焦点, 软键盘隐藏
+      document.querySelectorAll("input").forEach(function(item) {
+        item.blur();
+      });
       this[val] = true;
     },
     switchPicker(param) {
       this.defaultTime = parseTime(new Date(), "{y}-{m}-{d} {h}:{i}");
       this[`${param}`] = !this[`${param}`];
     },
+    clickTimePicker() {},
     setChooseStart(val) {
       if (this.validateDate(val[5], "start")) {
         this.formData.startTime = val[5];
@@ -294,18 +299,13 @@ export default {
           };
           this.$store.commit("setFormData", formData);
           this.$store.commit("setSelectUser", []);
-          this.$router.push({ name: "detail" });
+          this.$router.push({
+            name: "detail",
+            params: {
+              id: res.data.data
+            }
+          });
           // this.$toast.text(res.data.msg);
-        } else {
-          this.$toast.text(res.data.msg);
-        }
-      });
-    },
-    getHost() {
-      getPocUserInfo().then(res => {
-        if (res.data.code === 200) {
-          this.host = res.data.data;
-          this.$store.commit("setSelectHost", [res.data.data]);
         } else {
           this.$toast.text(res.data.msg);
         }
@@ -313,9 +313,6 @@ export default {
     }
   },
   mounted() {
-    if (!this.$store.state.app.selectHost.length) {
-      this.getHost();
-    }
     this.defaultTime = parseTime(new Date(), "{y}-{m}-{d} {h}:{i}");
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {

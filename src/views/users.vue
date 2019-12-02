@@ -25,7 +25,7 @@
           :userNum="userNum"
         ></treeList>
       </div>
-      <div v-show="!isOrg && !curUser.length" class="miss">
+      <div v-show="!isOrg && !users.length" class="miss">
         找不到关于
         <span>“{{ searchName }}”</span>
         的联系人
@@ -37,7 +37,7 @@
           type="view"
           :userType="type"
           :orgData="[]"
-          :userData="curUser"
+          :userData="users"
           :selectData="tempUser"
         ></treeList>
       </div>
@@ -74,6 +74,7 @@ export default {
       tempUser: [], // 暂时存放选中都人员，确定后更新至selectuser
       curOrg: [], // 当前显示，包括用户
       curUser: [],
+      users: [], // 姓名搜索时候
       breadList: [], // 面包屑导航列表
       search: {
         oid: "",
@@ -112,11 +113,11 @@ export default {
               userName: curVal,
               oid: ""
             };
-            this.curUser = [];
+            this.users = [];
             this.searchUser();
           } else {
             this.isOrg = true;
-            this.curUser = [];
+            this.users = [];
           }
           // curVal ? (this.isOrg = false) : (this.isOrg = true);
         }, 300);
@@ -178,16 +179,16 @@ export default {
       getUsers(this.search).then(res => {
         if (res.data.code === 200) {
           if (res.data.data) {
-            this.curUser = this.curUser.concat(res.data.data);
+            this.users = this.users.concat(res.data.data);
           } else if (res.data.data && res.data.data.length === 20) {
-            this.curUser = this.curUser.concat(res.data.data);
+            this.users = this.users.concat(res.data.data);
             this.search.page++;
             this.searchUser();
           } else {
-            this.curUser = [];
+            this.users = [];
           }
         } else {
-          this.curUser = [];
+          this.users = [];
         }
       });
     },

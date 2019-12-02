@@ -21,7 +21,9 @@
         </div>
         <div class="users">
           <div class="label">
-            参会人员({{ data.length ? data.participantInfoDOS.length : 0 }})
+            参会人员({{
+              data.participantInfoDOS ? data.participantInfoDOS.length : 0
+            }})
           </div>
           <userList :data="data.participantInfoDOS"></userList>
         </div>
@@ -69,7 +71,7 @@ import userList from "_/user-list.vue";
 import lcTitle from "_/title.vue";
 import { getWeek } from "@/libs/tools";
 
-import { getMeetInfo, delMeet, startNowMeeting } from "@/api/data";
+import { getMeetInfo, delMeet, startNowMeeting, getSign } from "@/api/data";
 
 export default {
   components: { userList, lcTitle },
@@ -93,7 +95,18 @@ export default {
         ]
       },
       isVisible: false,
-      meetingId: ""
+      meetingId: "",
+      // 当前网页环境
+      environment: {
+        isAndroid: Boolean(navigator.userAgent.match(/android/gi)),
+        isIphone: Boolean(navigator.userAgent.match(/iphone|ipod/gi)),
+        isIpad: Boolean(navigator.userAgent.match(/ipad/gi)),
+        isWeixin: Boolean(navigator.userAgent.match(/MicroMessenger/gi)),
+        isAli: Boolean(navigator.userAgent.match(/AlipayClient/gi)),
+        isPhone: Boolean(
+          /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
+        )
+      }
     };
   },
   created() {
@@ -124,20 +137,43 @@ export default {
     wxShare() {
       let that = this; // 保存vue对象
       /* eslint-disable no-undef */
-      wx.ready(function() {
-        //需在用户可能点击分享按钮前就先调用
-        const share = {
-          title: that.data.meetingSubject, // 分享标题
-          desc: "", // 分享描述
-          link: "", // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-          imgUrl: "", // 分享图标
-          success: function() {
-            // 设置成功
-          }
-        };
-        wx.updateAppMessageShareData(share);
+      let obj = { url: location.href.split("#")[0] };
+      getSign(obj).then(res => {
+        if (res.data.code === 200) {
+          wx.config({
+            debug: false, // 是否开启debug
+            appId: res.data.data.appId,
+            timestamp: res.data.data.timestamp,
+            nonceStr: res.data.data.nonceStr,
+            signature: res.data.data.signature,
+            jsApiList: [
+              "updateAppMessageShareData" // 分享给朋友，新api
+            ]
+          });
+
+          wx.ready(function() {
+            //需在用户可能点击分享按钮前就先调用
+            const share = {
+              title: that.data.meetingSubject, // 分享标题
+              desc: that.data.remark, // 分享描述
+              link:
+                location.href.split("#")[0] + "#" + location.href.split("#")[1], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+              imgUrl: "", // 分享图标
+              success: function() {
+                // 设置成功
+              }
+            };
+            wx.updateAppMessageShareData(share);
+          });
+
+          wx.error(function(res) {
+            that.$toast.text(res);
+            // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+          });
+        } else {
+          this.$toast.text(res.data.msg);
+        }
       });
-      console.log("微信分享");
     },
     startMeeting() {
       let data = {
@@ -145,7 +181,7 @@ export default {
       };
       startNowMeeting(data).then(res => {
         if (res.data.code === 200) {
-          console.log("立即开会，跳转app");
+          // console.log("立即开会，跳转app");
         } else {
           this.$toast.text(res.data.msg);
         }
@@ -195,22 +231,11 @@ export default {
   mounted() {
     // console.log("id", this.$router.params.id);
     this.getInfo(this.meetingId);
+    this.wxShare();
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {
         click: true
       });
-      // 生成微信分享链接
-      // eslint-disable-next-line no-undef
-      // wx.config({
-      //   debug: false, // 是否开启debug
-      //   appId: '',
-      //   timestamp: '',
-      //   nonceStr: '',
-      //   signature: '',
-      //   jsApiList: [
-      //     'updateAppMessageShareData' // 分享给朋友，新api
-      //   ]
-      // })
     });
   }
 };

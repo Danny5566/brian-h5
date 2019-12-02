@@ -85,6 +85,17 @@ export const getPocUserInfo = () => {
   });
 };
 
+/**
+ * 微信分享配置
+ */
+export const getSign = params => {
+  return axios.request({
+    url: "/user/getSign",
+    params: params,
+    method: "get"
+  });
+};
+
 // /access/meeting/addMeeting
 
 // export const getOrg = () => {
