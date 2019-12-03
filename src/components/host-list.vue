@@ -40,7 +40,7 @@ export default {
       this.$emit("sendRemoveHost", id);
     },
     addUser(type) {
-      this.$router.push({
+      this.$router.replace({
         name: "users",
         params: {
           type: type

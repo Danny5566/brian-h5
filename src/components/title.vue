@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 <template>
   <nut-navbar
     :leftShow="data.back"
@@ -11,7 +12,7 @@
     <a v-if="data.avatar" slot="more-icon">
       <nut-avatar
         @activeAvatar="showAbout"
-        bgIcon
+        :bgIcon="bgIcon"
         :bgImage="
           this.$store.state.user.avatarImgPath
             ? this.$store.state.user.avatarImgPath
@@ -29,7 +30,8 @@ export default {
   props: ["userLength"],
   data() {
     return {
-      data: {}
+      data: {},
+      bgIcon: ""
     };
   },
   created() {
@@ -43,7 +45,7 @@ export default {
   },
   methods: {
     showAbout() {
-      this.$router.push({
+      this.$router.replace({
         name: "about"
       });
     },
@@ -51,11 +53,11 @@ export default {
       // 强制修改返回路径唯一
       if (this.data.curName === "reserve") {
         // 会议预约强制返回到会议记录
-        this.$router.push({ name: "record" });
+        this.$router.replace({ name: "record" });
       } else if (this.data.curName === "detail") {
-        this.$router.push({ name: "record" });
+        this.$router.replace({ name: "record" });
       } else {
-        this.$router.push(this.data.lastRoute);
+        this.$router.replace(this.data.lastRoute);
       }
     },
     share() {

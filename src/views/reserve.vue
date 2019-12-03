@@ -281,7 +281,7 @@ export default {
         meetingType: this.formData.meetingType,
         // hostId: this.formData.hostId,
         hostTel: this.formData.hostTel,
-        participantsTels: this.formData.participantsTels,
+        participantsTels: JSON.stringify(this.formData.participantsTels),
         remark: this.formData.remark
       };
       addMeeting(data).then(res => {
@@ -299,7 +299,7 @@ export default {
           };
           this.$store.commit("setFormData", formData);
           this.$store.commit("setSelectUser", []);
-          this.$router.push({
+          this.$router.replace({
             name: "detail",
             params: {
               id: res.data.data

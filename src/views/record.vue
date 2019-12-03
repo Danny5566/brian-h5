@@ -82,7 +82,7 @@ import card from "_/card";
 import lcTitle from "_/title.vue";
 import loading from "_/loading.vue";
 
-import { getH5MeetingPage, getPocUserInfo } from "@/api/data";
+import { getH5MeetingPage } from "@/api/data";
 
 export default {
   components: { card, lcTitle, loading },
@@ -129,7 +129,7 @@ export default {
       this.activeItem = pageSize;
     },
     reserve() {
-      this.$router.push({ name: "reserve" });
+      this.$router.replace({ name: "reserve" });
     },
     /**
      * 当前会议
@@ -170,24 +170,9 @@ export default {
         }
         this.scroll2.refresh();
       });
-    },
-    getHost() {
-      getPocUserInfo().then(res => {
-        if (res.data.code === 200) {
-          this.host = res.data.data;
-          this.$store.commit("setImg", res.data.data.displayPhoto);
-          this.$store.commit("setUserName", res.data.data.name);
-          this.$store.commit("setSelectHost", [res.data.data]);
-        } else {
-          this.$toast.text(res.data.msg);
-        }
-      });
     }
   },
   mounted() {
-    if (!this.$store.state.app.selectHost.length) {
-      this.getHost();
-    }
     this.getPage();
     this.getHisPage();
     this.$nextTick(() => {
@@ -280,6 +265,7 @@ export default {
   align-items: flex-end;
   border-bottom: 1px solid #f1f3f5;
   font-size: 15px;
+  background: #fff;
   div {
     padding: 4px 18px;
     position: relative;

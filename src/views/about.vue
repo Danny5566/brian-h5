@@ -8,7 +8,11 @@
           class="avatar"
           :style="avatarSelect"
         ></div>
-        <div v-else class="avatar">正常头像</div>
+        <div
+          v-else
+          class="avatar"
+          :style="{ backgroundImage: `url(${data.displayPhoto})` }"
+        ></div>
         <div class="name">{{ data.name }}</div>
         <div class="account">
           <span class="iconfont icon-user"></span>
@@ -58,15 +62,16 @@ export default {
         onOkBtn() {
           // 退出登录，清空token，跳转登录页
           store.commit("setToken", "");
+          location.reload();
           this.close(); //关闭对话框
-          router.push({ name: "login" });
+          router.replace({ name: "login" });
           this.$toast.text("当前账号已退出");
         }
       });
     }
   },
   mounted() {
-    this.data.displayPhoto = this.$store.state.user.displayPhoto;
+    this.data.displayPhoto = this.$store.state.user.avatarImgPath;
     this.data.id = this.$store.state.user.userId;
     this.data.name = this.$store.state.user.userName;
   }
@@ -85,6 +90,7 @@ export default {
     background-repeat: no-repeat;
     background-size: 100% 100%;
     margin-top: 40px;
+    border-radius: 100%;
   }
   .name {
     font-size: 18px;

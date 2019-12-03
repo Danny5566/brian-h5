@@ -211,8 +211,7 @@ export default {
       });
     },
     sendOrg(oid, type) {
-      // 判断是否没有子元素
-      if (oid && this.userNum[oid].all) {
+      if (oid) {
         let obj = {
           oid: oid,
           type: type

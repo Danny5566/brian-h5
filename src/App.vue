@@ -11,7 +11,7 @@ export default {
       height: ""
     };
   },
-  mounted() {
+  created() {
     this.height = window.innerHeight + "px";
   }
 };
@@ -45,9 +45,11 @@ export default {
     flex: 1;
     padding-top: 6px;
     overflow: hidden;
+    background: #fff;
     .card {
       border-bottom: 6px solid #f6f8fb;
       padding: 6px 16px;
+      background: #fff;
     }
   }
   .footer {

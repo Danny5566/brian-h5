@@ -53,7 +53,7 @@ class HttpRequest {
         // token 失效跳转 login
         if (res.data.code === -10086) {
           store.commit("setToken", "");
-          router.push({ name: "login" });
+          router.replace({ name: "login" });
         }
         this.destroy(url);
         const { data, status } = res;

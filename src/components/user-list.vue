@@ -11,7 +11,6 @@
       }"
       v-for="(item, index) in showList"
       :key="item.uid"
-      ref="smallitem"
     >
       <div v-if="!item.displayPhoto" class="avatar" :style="avatarSelect"></div>
       <div
@@ -75,7 +74,7 @@ export default {
       this.$emit("sendRemoveUser", id);
     },
     addUser(type) {
-      this.$router.push({
+      this.$router.replace({
         name: "users",
         params: {
           type: type
@@ -84,7 +83,7 @@ export default {
     },
     more() {
       if (this.showMore) {
-        this.$router.push({
+        this.$router.replace({
           name: "participant",
           params: {
             users: this.data

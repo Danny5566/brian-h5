@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     showDetail() {
-      this.$router.push({ path: `/detail/${this.data.id}` });
+      this.$router.replace({ path: `/detail/${this.data.id}` });
     }
   }
 };

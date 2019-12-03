@@ -30,6 +30,7 @@
 
 <script>
 import { login } from "@/api/user";
+import { getPocUserInfo } from "@/api/data";
 
 export default {
   name: "loginForm",
@@ -56,13 +57,34 @@ export default {
           // 登录成功
           this.$store.commit("setToken", res.data.data.token);
           this.$store.commit("setUserId", res.data.data.userName);
-          this.$router.push({
-            name: "record"
-          });
+          this.getHost();
         } else {
           this.$toast.text(res.data.msg);
         }
       });
+    },
+    getHost() {
+      getPocUserInfo()
+        .then(res => {
+          if (res.data.code === 200) {
+            this.host = res.data.data;
+            if (res.data.data.displayPhoto) {
+              this.$store.commit(
+                "setImg",
+                "http://oss.imbcloud.cn/image/" + res.data.data.displayPhoto
+              );
+            }
+            this.$store.commit("setUserName", res.data.data.name);
+            this.$store.commit("setSelectHost", [res.data.data]);
+          } else {
+            this.$toast.text(res.data.msg);
+          }
+        })
+        .then(() => {
+          this.$router.replace({
+            name: "record"
+          });
+        });
     }
   }
 };

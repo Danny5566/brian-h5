@@ -66,12 +66,13 @@
 
 <script>
 import Bscroll from "better-scroll";
+import CallApp from "callapp-lib";
 
 import userList from "_/user-list.vue";
 import lcTitle from "_/title.vue";
 import { getWeek } from "@/libs/tools";
 
-import { getMeetInfo, delMeet, startNowMeeting, getSign } from "@/api/data";
+import { getMeetInfo, delMeet, getSign } from "@/api/data";
 
 export default {
   components: { userList, lcTitle },
@@ -106,6 +107,16 @@ export default {
         isPhone: Boolean(
           /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
         )
+      },
+      device: "",
+      option: {
+        scheme: {
+          protocol: "imbcloud"
+        },
+        appstore: "",
+        yingyongbao: "",
+        fallback: "https://ai.imbcloud.cn/h5",
+        timeout: 2000
       }
     };
   },
@@ -138,6 +149,10 @@ export default {
       let that = this; // 保存vue对象
       /* eslint-disable no-undef */
       let obj = { url: location.href.split("#")[0] };
+      // this.$toast.text(
+      //   `${location.href.split("#")[0]} + "#" + ${location.href.split("#")[1]}`
+      // );
+
       getSign(obj).then(res => {
         if (res.data.code === 200) {
           wx.config({
@@ -147,23 +162,24 @@ export default {
             nonceStr: res.data.data.nonceStr,
             signature: res.data.data.signature,
             jsApiList: [
+              "onMenuShareAppMessage",
               "updateAppMessageShareData" // 分享给朋友，新api
             ]
           });
 
-          wx.ready(function() {
+          wx.ready(() => {
             //需在用户可能点击分享按钮前就先调用
             const share = {
               title: that.data.meetingSubject, // 分享标题
               desc: that.data.remark, // 分享描述
               link:
-                location.href.split("#")[0] + "#" + location.href.split("#")[1], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                location.href.split("#")[0] + "#" + "/share/" + that.data.id,
               imgUrl: "", // 分享图标
               success: function() {
                 // 设置成功
               }
             };
-            wx.updateAppMessageShareData(share);
+            wx.onMenuShareAppMessage(share);
           });
 
           wx.error(function(res) {
@@ -176,16 +192,23 @@ export default {
       });
     },
     startMeeting() {
-      let data = {
-        meetingId: this.meetingId
-      };
-      startNowMeeting(data).then(res => {
-        if (res.data.code === 200) {
-          // console.log("立即开会，跳转app");
-        } else {
-          this.$toast.text(res.data.msg);
-        }
-      });
+      // 判断不再应用中时候的处理，唤醒客户端
+      let that = this;
+      if (!this.device) {
+        const lib = new CallApp(this.option);
+        lib.open({
+          path: "meeting/start",
+          param: {
+            id: that.data.id
+          },
+          callback: function() {
+            window.location.href = "https://ai.imbcloud.cn/h5";
+            return false;
+          }
+        });
+      } else if (window.android) {
+        window.android.startMeeting(that.data.id);
+      }
     },
     cancelMeeting(meetingId) {
       let that = this;
@@ -196,7 +219,7 @@ export default {
           //确定按钮点击事件
           delMeet(meetingId).then(res => {
             if (res.data.code === 200) {
-              that.$router.push({ name: "record" });
+              that.$router.replace({ name: "record" });
             } else {
               that.$toast.text(res.data.msg);
             }
@@ -237,6 +260,9 @@ export default {
         click: true
       });
     });
+    if (window.android) {
+      this.device = "android";
+    }
   }
 };
 </script>

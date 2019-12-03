@@ -315,10 +315,10 @@ export default {
       // 放入store中
       if (this.type === "host") {
         this.$store.commit("setSelectHost", this.tempUser);
-        this.$router.push("reserve");
+        this.$router.replace("reserve");
       } else if (this.type === "user") {
         this.$store.commit("setSelectUser", this.tempUser);
-        this.$router.push("reserve");
+        this.$router.replace("reserve");
       }
     }
   },

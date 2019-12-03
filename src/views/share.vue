@@ -89,11 +89,11 @@ export default {
       },
       option: {
         scheme: {
-          protocol: "ykshortvideo"
+          protocol: "imbcloud"
         },
         appstore: "",
         yingyongbao: "",
-        fallback: "https://baidu.com",
+        fallback: "https://ai.imbcloud.cn/h5",
         timeout: 2000
       }
     };
@@ -190,15 +190,20 @@ export default {
       });
     },
     join() {
+      let that = this;
       if (!this.data.meetingSubject) {
         return false;
       }
+      // 判断不再应用中时候的处理，唤醒客户端
       const lib = new CallApp(this.option);
       lib.open({
-        path: "",
-        param: "",
+        path: "meeting/join",
+        param: {
+          id: that.data.id
+        },
         callback: function() {
           window.location.href = "https://ai.imbcloud.cn/h5";
+          return false;
         }
       });
     },
