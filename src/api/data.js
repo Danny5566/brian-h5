@@ -96,11 +96,15 @@ export const getSign = params => {
   });
 };
 
-// /access/meeting/addMeeting
-
-// export const getOrg = () => {
-//   return axios.request({
-//     url: "/user/h5/getPocOrganizationList",
-//     method: "get"
-//   });
-// };
+/**
+ * 通过appt中token，获取H5的token
+ */
+export const getH5Token = param => {
+  return axios.request({
+    url: "/user/getH5Token",
+    method: "get",
+    headers: {
+      token: param
+    }
+  });
+};

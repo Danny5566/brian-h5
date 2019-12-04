@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 import store from "@/store";
 import routes from "./routers";
 import { getToken } from "@/libs/util";
+import { getH5Token } from "@/api/data";
 
 Vue.use(VueRouter);
 
@@ -47,21 +48,40 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // token 带参数的话获取
+  let loginToken = getHashParameters("token");
 
   if (!token && to.name !== LOGIN_NAME) {
     // detail 页面分享给没有token的人的时候处理为 share
-    if (to.name === "detail") {
+    if (to.name === "detail" && loginToken) {
+      // app 跳转带token 查询
+      getH5Token(loginToken).then(res => {
+        if (res.data.code === 200) {
+          store.commit("setToken", res.data.data.token);
+          next();
+        } else {
+          next();
+        }
+      });
+      return false;
+    } else if (to.name === "detail" && !loginToken) {
+      // 本地跳转分享，转为share
       let path = to.path.replace("detail", "share");
       next({ path: path });
       return false;
     }
     next({ name: LOGIN_NAME });
   } else if (!token && to.name === LOGIN_NAME) {
-    let loginToken = getHashParameters("token");
     if (loginToken) {
-      // app token 获取h5 token, 获取完成后跳转 record
-      router.replace({ name: "record" });
-      next();
+      // 通过app token 获取当前页面 token
+      getH5Token(loginToken).then(res => {
+        if (res.data.code === 200) {
+          store.commit("setToken", res.data.data.token);
+          router.replace({ name: "record" });
+          next();
+        } else {
+          next();
+        }
+      });
     } else {
       next();
     }

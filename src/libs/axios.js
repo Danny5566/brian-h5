@@ -28,7 +28,8 @@ class HttpRequest {
     // 请求拦截
     instance.interceptors.request.use(
       config => {
-        if (store.state.user.token) {
+        // 当前vuex 已存在token, 并且没有另外传头部token 的时候处理
+        if (store.state.user.token && !config.headers.token) {
           config.headers.token = store.state.user.token;
         }
         config.headers.source = "H5";

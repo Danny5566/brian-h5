@@ -20,6 +20,7 @@ export default {
 <style lang="scss">
 #app {
   -webkit-tap-highlight-color: transparent;
+  background: #ffffff;
 }
 .main {
   height: 100%;
