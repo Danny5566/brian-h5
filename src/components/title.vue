@@ -3,7 +3,7 @@
   <nut-navbar
     :leftShow="data.back"
     :rightShow="data.avatar || data.share"
-    style="height: 50px; line-height: 50px;"
+    style="height: 44px; line-height: 44px;"
     @on-click-back="back"
     class="navbar"
   >
