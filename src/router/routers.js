@@ -81,7 +81,7 @@ export default [
     },
     component: () => import("@/views/error.vue")
   }
-  // {
+  // ,{
   //   path: "/test",
   //   name: "test",
   //   meta: {

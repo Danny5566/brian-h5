@@ -33,9 +33,6 @@ const router = new VueRouter({
   routes
 });
 
-// const
-
-// let toURL = null
 router.beforeEach((to, from, next) => {
   const token = getToken();
   // vuex数据空，重新跳转到登录页
@@ -43,7 +40,7 @@ router.beforeEach((to, from, next) => {
     store.commit("setToken", "");
   }
   // share 页面不校验token
-  if (to.name === "share" || to.name === "participant") {
+  if (to.name === "share" || to.name === "participant" || to.name === "error") {
     next();
     return;
   }
@@ -59,7 +56,7 @@ router.beforeEach((to, from, next) => {
           store.commit("setToken", res.data.data.token);
           next();
         } else {
-          next();
+          next({ name: "error" });
         }
       });
       return false;
