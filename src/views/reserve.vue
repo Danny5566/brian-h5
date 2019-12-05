@@ -53,6 +53,7 @@
             class="nut-input"
             :hasBorder="false"
             :clearBtn="false"
+            @blur="blur"
           ></nut-textinput>
         </div>
         <div class="item column-item">
@@ -209,8 +210,12 @@ export default {
     changeType(val) {
       this.formData.meetingType = val;
     },
+    blur() {
+      // 解决微信软键盘收缩后页面不恢复正常
+      window.scrollTo(0, 0);
+    },
     showTime(val) {
-      // 取消所有input的焦点, 软键盘隐藏
+      // 选择时间时，取消所有input的焦点, 软键盘隐藏
       document.querySelectorAll("input").forEach(function(item) {
         item.blur();
       });
