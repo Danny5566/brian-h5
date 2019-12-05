@@ -11,8 +11,11 @@ export default {
       height: ""
     };
   },
-  created() {
-    this.height = window.innerHeight + "px";
+  mounted() {
+    // 设置延迟解决微信再次扫描底部显示不完全问题
+    setTimeout(() => {
+      this.height = window.innerHeight + "px";
+    }, 20);
   }
 };
 </script>
