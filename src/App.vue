@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :style="{ height: height }">
+  <div id="app">
     <router-view />
   </div>
 </template>
@@ -13,14 +13,19 @@ export default {
   },
   mounted() {
     // 设置延迟解决微信再次扫描底部显示不完全问题
-    setTimeout(() => {
-      this.height = window.innerHeight + "px";
-    }, 20);
+    // setTimeout(() => {
+    //   this.height = window.innerHeight + "px";
+    // }, 20);
   }
 };
 </script>
 
 <style lang="scss">
+html,
+body,
+#app {
+  height: 100%;
+}
 #app {
   -webkit-tap-highlight-color: transparent;
   background: #ffffff;

@@ -33,7 +33,7 @@
         </div>
       </div>
     </div>
-    <div class="footer double">
+    <div class="footer double" v-if="showFooter">
       <div>
         <nut-button
           type="gray"
@@ -56,8 +56,8 @@
     </div>
     <nut-actionsheet :isVisible="isVisible" @close="switchActionSheet">
       <div slot="custom" class="custom-wrap">
-        <span class="iconfont icon-weixin" @click="wxShare"></span>
-        <span class="iconfont icon-dingding"></span>
+        <span class="iconfont icon-weixin" @click="jumpTo('wx')"></span>
+        <span class="iconfont icon-dingding" @click="jumpTo('dd')"></span>
         <span class="iconfont icon-link" @click="copy"></span>
       </div>
     </nut-actionsheet>
@@ -72,7 +72,7 @@ import userList from "_/user-list.vue";
 import lcTitle from "_/title.vue";
 import { getWeek } from "@/libs/tools";
 
-import { getMeetInfo, delMeet, getSign } from "@/api/data";
+import { getMeetInfo, delMeet, getSign, getPocUserInfo } from "@/api/data";
 
 export default {
   components: { userList, lcTitle },
@@ -108,7 +108,6 @@ export default {
           /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
         )
       },
-      device: "",
       option: {
         scheme: {
           protocol: "imbcloud"
@@ -117,11 +116,28 @@ export default {
         yingyongbao: "",
         fallback: "https://ai.imbcloud.cn/h5",
         timeout: 2000
-      }
+      },
+      showFooter: false
     };
   },
   created() {
     this.meetingId = this.$route.params.id;
+    let selectHost = this.$store.state.app.selectHost;
+    let curTel = this.$store.state.app.curTel;
+    if (window.android || window.iosBack) {
+      // 判断是否已存在
+      if (curTel) {
+        if (curTel === selectHost[0].tel) {
+          this.showFooter = true;
+        } else {
+          this.showFooter = false;
+        }
+      } else {
+        this.getHost(this.meetingId);
+      }
+    } else {
+      this.showFooter = true;
+    }
   },
   filters: {
     formatDate: function(val) {
@@ -132,6 +148,21 @@ export default {
     }
   },
   methods: {
+    jumpTo(val) {
+      if (val === "wx") {
+        if (window.android) {
+          window.android.shareToWx(this.data.meetingSubject, this.data.remark);
+        } else if (window.shareToWx) {
+          window.shareToWx(this.data.meetingSubject, this.data.remark);
+        }
+      } else if (val === "dd") {
+        if (window.android) {
+          window.android.shareToDD(this.data.meetingSubject, this.data.remark);
+        } else if (window.shareToDD) {
+          window.shareToDD(this.data.meetingSubject, this.data.remark);
+        }
+      }
+    },
     copy() {
       let that = this;
       let uri = location.href.replace("detail", "share");
@@ -194,20 +225,23 @@ export default {
     startMeeting() {
       // 判断不再应用中时候的处理，唤醒客户端
       let that = this;
-      if (!this.device) {
+      if (window.android) {
+        window.android.startMeeting(that.data.id);
+      } else if (window.startMeeting) {
+        window.startMeeting(that.data.id);
+      } else {
         const lib = new CallApp(this.option);
         lib.open({
           path: "meeting/start",
           param: {
-            id: that.data.id
+            id: that.data.id,
+            tel: that.data.participantInfoDOS[0].tel
           },
           callback: function() {
             window.location.href = "https://ai.imbcloud.cn/h5";
             return false;
           }
         });
-      } else if (window.android) {
-        window.android.startMeeting(that.data.id);
       }
     },
     cancelMeeting(meetingId) {
@@ -219,6 +253,15 @@ export default {
           //确定按钮点击事件
           delMeet(meetingId).then(res => {
             if (res.data.code === 200) {
+              if (window.android) {
+                window.android.refreshMeetings();
+                window.android.back();
+                return false;
+              } else if (window.iosBack) {
+                window.refreshMeetings();
+                window.iosBack();
+                return false;
+              }
               that.$router.replace({ name: "record" });
             } else {
               that.$toast.text(res.data.msg);
@@ -249,6 +292,25 @@ export default {
           this.data = {};
         }
       });
+    },
+    getHost(param) {
+      getMeetInfo(param).then(res => {
+        if (res.data.code === 200) {
+          let hostTel = res.data.data.hostTel;
+          this.$store.commit("setCurTel", hostTel);
+          getPocUserInfo().then(res => {
+            if (res.data.code === 200) {
+              // 判断host
+              this.$store.commit("setSelectHost", [res.data.data]);
+              if (hostTel === res.data.data.tel) {
+                this.showFooter = true;
+              } else {
+                this.showFooter = false;
+              }
+            }
+          });
+        }
+      });
     }
   },
   mounted() {
@@ -260,9 +322,6 @@ export default {
         click: true
       });
     });
-    if (window.android) {
-      this.device = "android";
-    }
   }
 };
 </script>

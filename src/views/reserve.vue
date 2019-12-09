@@ -238,7 +238,7 @@ export default {
     },
     validateDate(val, type) {
       if (val < this.defaultTime) {
-        this.$toast.text("会议时间不能小于当前时间");
+        this.$toast.text("会议时间最早为5分钟后");
         return false;
       } else if (this.formData.startTime && type === "end") {
         if (this.formData.startTime > val) {
@@ -318,7 +318,12 @@ export default {
     }
   },
   mounted() {
-    this.defaultTime = parseTime(new Date(), "{y}-{m}-{d} {h}:{i}");
+    // 默认时间为当前时间推后5分钟
+    let date = new Date();
+    this.defaultTime = parseTime(
+      date.getTime() + 300000,
+      "{y}-{m}-{d} {h}:{i}"
+    );
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {
         click: true

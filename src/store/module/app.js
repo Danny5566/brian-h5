@@ -20,7 +20,8 @@ export default {
       tel: "",
       participantsTels: [],
       remark: ""
-    }
+    },
+    curTel: ""
   },
   mutations: {
     setCurName(state, curName) {
@@ -55,6 +56,9 @@ export default {
     },
     setFormData(state, formData) {
       state.formData = formData;
+    },
+    setCurTel(state, curTel) {
+      state.curTel = curTel;
     }
   },
   actions: {}

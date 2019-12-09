@@ -42,6 +42,10 @@ export default {
     this.data.lastRoute = this.$store.state.app.lastRoute;
     this.data.curRoute = this.$store.state.app.curRoute;
     this.data.curName = this.$store.state.app.curName;
+    // 当在会议中时，分享事件触发
+    if ((window.android || window.iosBack) && this.data.curName === "detail") {
+      this.data.share = true;
+    }
   },
   methods: {
     showAbout() {
@@ -50,6 +54,14 @@ export default {
       });
     },
     back() {
+      // 安卓app内调用 app 返回方法
+      if (window.android && this.data.curName === "detail") {
+        window.android.back();
+        return false;
+      } else if (window.iosBack && this.data.curName === "detail") {
+        window.iosBack();
+        return false;
+      }
       // 强制修改返回路径唯一
       if (this.data.curName === "reserve") {
         // 会议预约强制返回到会议记录

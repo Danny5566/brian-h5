@@ -53,6 +53,7 @@ export default {
   },
   watch: {
     data: function() {
+      // 详情处理
       this.dealData();
     }
   },
@@ -60,7 +61,7 @@ export default {
     dealData() {
       if (this.data.length > 0) {
         this.showList = JSON.parse(JSON.stringify(this.data));
-        let length = Math.floor(this.$refs.item.clientWidth / 60);
+        let length = Math.floor(this.$refs.item.clientWidth / 62);
         if (this.showList.length > length && this.type !== "edit") {
           this.showMore = true;
           this.showList.length = length;

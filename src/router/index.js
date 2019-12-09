@@ -51,9 +51,9 @@ router.beforeEach((to, from, next) => {
     // detail 页面分享给没有token的人的时候处理为 share
     if (to.name === "detail" && loginToken) {
       // app 跳转带token 查询
-      getH5Token(loginToken).then(res => {
+      getH5Token(loginToken.token).then(res => {
         if (res.data.code === 200) {
-          store.commit("setToken", res.data.data.token);
+          store.commit("setToken", res.data.data);
           next();
         } else {
           next({ name: "error" });
@@ -61,6 +61,14 @@ router.beforeEach((to, from, next) => {
       });
       return false;
     } else if (to.name === "detail" && !loginToken) {
+      // app环境不跳转分享页面
+      if (window.android) {
+        next();
+        return false;
+      } else if (window.iosBack) {
+        next();
+        return false;
+      }
       // 本地跳转分享，转为share
       let path = to.path.replace("detail", "share");
       next({ path: path });
@@ -72,7 +80,7 @@ router.beforeEach((to, from, next) => {
       // 通过app token 获取当前页面 token
       getH5Token(loginToken).then(res => {
         if (res.data.code === 200) {
-          store.commit("setToken", res.data.data.token);
+          store.commit("setToken", res.data.data);
           router.replace({ name: "record" });
           next();
         } else {
@@ -85,6 +93,19 @@ router.beforeEach((to, from, next) => {
   } else if (token && to.name === LOGIN_NAME) {
     next({ name: "record" });
   } else if (token && to.name !== LOGIN_NAME) {
+    if (to.name === "detail" && loginToken) {
+      store.commit("setToken", "");
+      // app 跳转带token 查询
+      getH5Token(loginToken.token).then(res => {
+        if (res.data.code === 200) {
+          store.commit("setToken", res.data.data);
+          next();
+        } else {
+          next({ name: "error" });
+        }
+      });
+      return false;
+    }
     next();
   } else {
     next({ name: "error" });
