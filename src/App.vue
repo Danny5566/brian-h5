@@ -1,21 +1,35 @@
 <template>
   <div id="app">
     <router-view />
+    <guide v-if="open"></guide>
   </div>
 </template>
 
 <script>
+import guide from "_/guide";
+
 export default {
+  components: { guide },
   data() {
     return {
-      height: ""
+      height: "",
+      open: false,
+      environment: {
+        isAndroid: Boolean(navigator.userAgent.match(/android/gi)),
+        isIphone: Boolean(navigator.userAgent.match(/iphone|ipod/gi)),
+        isIpad: Boolean(navigator.userAgent.match(/ipad/gi)),
+        isWeixin: Boolean(navigator.userAgent.match(/MicroMessenger/gi)),
+        isAli: Boolean(navigator.userAgent.match(/AlipayClient/gi)),
+        isPhone: Boolean(
+          /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
+        )
+      }
     };
   },
-  mounted() {
-    // 设置延迟解决微信再次扫描底部显示不完全问题
-    // setTimeout(() => {
-    //   this.height = window.innerHeight + "px";
-    // }, 20);
+  created() {
+    if (this.environment.isAndroid && this.environment.isWeixin) {
+      this.open = true;
+    }
   }
 };
 </script>
