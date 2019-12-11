@@ -281,6 +281,12 @@ export default {
       getMeetInfo(param).then(res => {
         if (res.data.code === 200) {
           this.data = res.data.data;
+          if (
+            (this.data.meetingState === 0 || this.data.meetingState === 1) &&
+            this.showFooter
+          ) {
+            this.showFooter = true;
+          }
           let host = {
             uid: res.data.data.hostId,
             tel: res.data.data.hostTel,

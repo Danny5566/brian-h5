@@ -35,7 +35,7 @@
         </div>
       </div>
     </div>
-    <div class="footer">
+    <div class="footer" v-if="showFooter">
       <div class="btn-box">
         <nut-button
           :type="data.meetingSubject ? 'primary' : 'gray'"
@@ -95,7 +95,8 @@ export default {
         yingyongbao: "",
         fallback: "https://ai.imbcloud.cn/h5",
         timeout: 2000
-      }
+      },
+      showFooter: false
     };
   },
   filters: {
@@ -226,9 +227,11 @@ export default {
           switch (res.data.data.meetingState) {
             case 0:
               this.activeClass = "reservation";
+              this.showFooter = true;
               break;
             case 1:
               this.activeClass = "process";
+              this.showFooter = true;
               break;
             case 2:
               this.activeClass = "end";
