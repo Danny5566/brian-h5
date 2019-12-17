@@ -272,10 +272,14 @@ export default {
     submit() {
       // this.formData.hostId = this.host.uid;
       this.formData.hostTel = this.host.tel;
-      this.formData.participantsTels = [];
+      this.formData.participantsTels = "";
       this.participantInfoDOS.forEach(item => {
-        this.formData.participantsTels.push(item.tel);
+        this.formData.participantsTels =
+          this.formData.participantsTels + "," + item.tel;
       });
+      this.formData.participantsTels = this.formData.participantsTels.substring(
+        1
+      );
       let startTime = getDateDiff(this.formData.startTime);
       let endTime = getDateDiff(this.formData.endTime);
       // formdata会同步更新store所以这里不用formdata直接修改开始时间和结束时间
@@ -286,7 +290,7 @@ export default {
         meetingType: this.formData.meetingType,
         // hostId: this.formData.hostId,
         hostTel: this.formData.hostTel,
-        participantsTels: JSON.stringify(this.formData.participantsTels),
+        participantsTels: this.formData.participantsTels,
         remark: this.formData.remark
       };
       addMeeting(data).then(res => {
