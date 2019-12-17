@@ -4,7 +4,8 @@
       <span class="title">会议名称</span>
       <span>{{ data.meetingSubject }}</span>
       <span v-if="data.meetingState === 0" class="status reserve">预约中</span>
-      <span v-else class="status process">进行中</span>
+      <span v-if="data.meetingState === 1" class="status process">进行中</span>
+      <span v-if="data.meetingState === 2" class="status end">已结束</span>
     </div>
     <div>
       <span class="title">主持人</span>
@@ -90,6 +91,9 @@ export default {
   }
   .process {
     color: #53dac9;
+  }
+  .end {
+    color: #cccccc;
   }
   .remark {
     color: #999999;
