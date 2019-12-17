@@ -33,7 +33,7 @@
         </div>
       </div>
     </div>
-    <div class="footer double" v-if="showFooter">
+    <div class="footer double" v-if="showFooter && data.meetingState !== 1">
       <div>
         <nut-button
           type="gray"
@@ -51,6 +51,18 @@
           shape="circle"
           @click="startMeeting"
           >立即开会</nut-button
+        >
+      </div>
+    </div>
+    <div class="footer" v-if="data.meetingState === 1">
+      <div class="btn-box">
+        <nut-button
+          type="primary"
+          style="color: #fff;"
+          :block="true"
+          shape="circle"
+          @click="join"
+          >参加会议</nut-button
         >
       </div>
     </div>
@@ -117,7 +129,8 @@ export default {
         fallback: "https://ai.imbcloud.cn/h5",
         timeout: 2000
       },
-      showFooter: false
+      showFooter: false,
+      tempFooter: false
     };
   },
   created() {
@@ -128,15 +141,15 @@ export default {
       // 判断是否已存在
       if (curTel) {
         if (curTel === selectHost[0].tel) {
-          this.showFooter = true;
+          this.tempFooter = true;
         } else {
-          this.showFooter = false;
+          this.tempFooter = false;
         }
       } else {
         this.getHost(this.meetingId);
       }
     } else {
-      this.showFooter = true;
+      this.tempFooter = true;
     }
   },
   filters: {
@@ -148,6 +161,27 @@ export default {
     }
   },
   methods: {
+    join() {
+      let that = this;
+      // 判断不再应用中时候的处理，唤醒客户端
+      if (window.android) {
+        window.android.joinMeeting(that.data.id);
+      } else if (window.joinMeeting) {
+        window.joinMeeting(that.data.id);
+      } else {
+        const lib = new CallApp(this.option);
+        lib.open({
+          path: "meeting/join",
+          param: {
+            id: that.data.id
+          },
+          callback: function() {
+            window.location.href = "https://ai.imbcloud.cn/h5";
+            return false;
+          }
+        });
+      }
+    },
     jumpTo(val) {
       if (val === "wx") {
         if (window.android) {
@@ -205,7 +239,8 @@ export default {
               desc: that.data.remark, // 分享描述
               link:
                 location.href.split("#")[0] + "#" + "/share/" + that.data.id,
-              imgUrl: "", // 分享图标
+              imgUrl:
+                "https://imbcloud.oss-cn-hangzhou.aliyuncs.com/image/meeting.png", // 分享图标
               success: function() {
                 // 设置成功
               }
@@ -283,9 +318,11 @@ export default {
           this.data = res.data.data;
           if (
             (this.data.meetingState === 0 || this.data.meetingState === 1) &&
-            this.showFooter
+            this.tempFooter
           ) {
             this.showFooter = true;
+          } else {
+            this.showFooter = false;
           }
           let host = {
             uid: res.data.data.hostId,
@@ -333,6 +370,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/**:focus 电视遥控选择聚焦 */
+.focusBtn:focus {
+  outline: -webkit-focus-ring-color auto 1px;
+}
 .main {
   .contain {
     padding: 6px 20px;
