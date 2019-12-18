@@ -95,4 +95,19 @@ body,
 .reserve .nut-input input {
   color: #666666;
 }
+/**
+  修改 dialog 按钮样式
+*/
+.dialog .nut-dialog-cancel {
+  border-top: 1px solid #f1f3f5;
+}
+.dialog .nut-dialog-ok {
+  background: #fff;
+  color: #d0021b;
+  border-top: 1px solid #f1f3f5;
+  border-left: 1px solid #f1f3f5;
+}
+.dialog .nut-dialog-btn:focus {
+  outline: -webkit-focus-ring-color auto 5px !important;
+}
 </style>
