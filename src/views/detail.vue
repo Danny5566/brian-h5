@@ -33,13 +33,14 @@
         </div>
       </div>
     </div>
-    <div class="footer double" v-if="showFooter && data.meetingState !== 1">
+    <div class="footer double" v-if="isHost && isNotEnd">
       <div>
         <nut-button
           type="gray"
           color="#FFFFFF"
           :block="true"
           shape="circle"
+          class="focus"
           @click="cancelMeeting(meetingId)"
           >取消预约</nut-button
         >
@@ -49,18 +50,20 @@
           type="primary"
           :block="true"
           shape="circle"
+          class="focus"
           @click="startMeeting"
           >立即开会</nut-button
         >
       </div>
     </div>
-    <div class="footer" v-if="data.meetingState === 1">
+    <div class="footer" v-if="!isHost && isNotEnd">
       <div class="btn-box">
         <nut-button
           type="primary"
           style="color: #fff;"
           :block="true"
           shape="circle"
+          class="focus"
           @click="join"
           >参加会议</nut-button
         >
@@ -129,28 +132,10 @@ export default {
         fallback: "https://ai.imbcloud.cn/h5",
         timeout: 2000
       },
-      showFooter: false,
-      tempFooter: false
+      curHost: [],
+      isHost: false,
+      isNotEnd: false
     };
-  },
-  created() {
-    this.meetingId = this.$route.params.id;
-    let selectHost = this.$store.state.app.selectHost;
-    let curTel = this.$store.state.app.curTel;
-    if (window.android || window.iosBack) {
-      // 判断是否已存在
-      if (curTel) {
-        if (curTel === selectHost[0].tel) {
-          this.tempFooter = true;
-        } else {
-          this.tempFooter = false;
-        }
-      } else {
-        this.getHost(this.meetingId);
-      }
-    } else {
-      this.tempFooter = true;
-    }
   },
   filters: {
     formatDate: function(val) {
@@ -284,6 +269,7 @@ export default {
       this.$dialog({
         title: "取消预约",
         content: "你正在取消会议操作，确定取消会议吗？",
+        customClass: "dialog",
         onOkBtn() {
           //确定按钮点击事件
           delMeet(meetingId).then(res => {
@@ -316,13 +302,11 @@ export default {
       getMeetInfo(param).then(res => {
         if (res.data.code === 200) {
           this.data = res.data.data;
-          if (
-            (this.data.meetingState === 0 || this.data.meetingState === 1) &&
-            this.tempFooter
-          ) {
-            this.showFooter = true;
+          // 状态处理：
+          if (res.data.data.meetingState === 2) {
+            this.isNotEnd = false;
           } else {
-            this.showFooter = false;
+            this.isNotEnd = true;
           }
           let host = {
             uid: res.data.data.hostId,
@@ -331,38 +315,33 @@ export default {
             displayPhoto: res.data.data.hostDisplayPhoto
           };
           this.data.participantInfoDOS.unshift(host);
-        } else {
-          this.data = {};
-        }
-      });
-    },
-    getHost(param) {
-      getMeetInfo(param).then(res => {
-        if (res.data.code === 200) {
-          let hostTel = res.data.data.hostTel;
-          this.$store.commit("setCurTel", hostTel);
+          /**
+           * 通过token获取当前登录host信息
+           */
           getPocUserInfo().then(res => {
-            if (res.data.code === 200) {
-              // 判断host
-              this.$store.commit("setSelectHost", [res.data.data]);
-              if (hostTel === res.data.data.tel) {
-                this.showFooter = true;
-              } else {
-                this.showFooter = false;
-              }
+            // 状态处理 ： 当前登录用户是否主持人
+            if (res.data.data.tel === this.data.participantInfoDOS[0].tel) {
+              this.isHost = true;
+            } else {
+              this.isHost = false;
             }
           });
+        } else {
+          this.data = {};
         }
       });
     }
   },
   mounted() {
-    // console.log("id", this.$router.params.id);
+    this.meetingId = this.$route.params.id;
     this.getInfo(this.meetingId);
     this.wxShare();
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {
-        click: true
+        mouseWheel: true,
+        click: true,
+        disableMouse: false, // 默认自动判断环境移动端和pc端
+        tap: true
       });
     });
   }
@@ -371,8 +350,8 @@ export default {
 
 <style lang="scss" scoped>
 /**:focus 电视遥控选择聚焦 */
-.focusBtn:focus {
-  outline: -webkit-focus-ring-color auto 1px;
+.focus:focus {
+  outline: -webkit-focus-ring-color auto 5px !important;
 }
 .main {
   .contain {
