@@ -59,6 +59,7 @@ export default {
     loginOut() {
       this.$dialog({
         title: "确定退出登录？",
+        customClass: "dialog",
         onOkBtn() {
           // 退出登录，清空token，跳转登录页
           store.commit("setToken", "");
