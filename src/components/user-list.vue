@@ -61,10 +61,10 @@ export default {
     dealData() {
       if (this.data.length > 0) {
         this.showList = JSON.parse(JSON.stringify(this.data));
-        let length = Math.floor(this.$refs.item.clientWidth / 62);
-        if (this.showList.length > length && this.type !== "edit") {
+        // let length = Math.floor(this.$refs.item.clientWidth / 62);
+        if (this.showList.length > 5 && this.type !== "edit") {
           this.showMore = true;
-          this.showList.length = length;
+          this.showList.length = 5;
         }
       } else {
         this.showList = this.data;
@@ -103,6 +103,8 @@ export default {
 <style lang="scss" scoped>
 .user-list {
   display: flex;
+  position: relative;
+  // overflow: hidden;
   .item {
     position: relative;
     padding-right: 10px;

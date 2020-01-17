@@ -1,7 +1,6 @@
 <template id="t">
   <div class="container">
-    <input type="text" v-model="message" />
-    <button type="button" @click="doCopy">Copy!</button>
+    <input type="text" ref="input" />
   </div>
 </template>
 
@@ -9,22 +8,8 @@
 export default {
   data: function() {
     return {
-      message: "Copy These Text"
+      picker: null
     };
-  },
-  methods: {
-    doCopy: function() {
-      this.$copyText(this.message).then(
-        function(e) {
-          alert("Copied");
-          console.log(e);
-        },
-        function(e) {
-          alert("Can not copy");
-          console.log(e);
-        }
-      );
-    }
   }
 };
 </script>

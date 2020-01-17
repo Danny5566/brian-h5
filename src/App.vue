@@ -110,4 +110,9 @@ body,
 .dialog .nut-dialog-btn:focus {
   outline: -webkit-focus-ring-color auto 5px !important;
 }
+// 导航标题聚焦样式, 蒙版聚焦样式
+.nav-title:focus,
+.nut-actionsheet-panel:focus {
+  outline: none;
+}
 </style>

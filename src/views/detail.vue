@@ -40,7 +40,7 @@
           color="#FFFFFF"
           :block="true"
           shape="circle"
-          class="focus"
+          :class="{ focus: focusState }"
           @click="cancelMeeting(meetingId)"
           >取消预约</nut-button
         >
@@ -50,7 +50,7 @@
           type="primary"
           :block="true"
           shape="circle"
-          class="focus"
+          :class="{ focus: focusState }"
           @click="startMeeting"
           >立即开会</nut-button
         >
@@ -63,7 +63,7 @@
           style="color: #fff;"
           :block="true"
           shape="circle"
-          class="focus"
+          :class="{ focus: focusState }"
           @click="join"
           >参加会议</nut-button
         >
@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import Bscroll from "better-scroll";
+// import Bscroll from "better-scroll";
 import CallApp from "callapp-lib";
 
 import userList from "_/user-list.vue";
@@ -134,7 +134,8 @@ export default {
       },
       curHost: [],
       isHost: false,
-      isNotEnd: false
+      isNotEnd: false,
+      focusState: true // 按钮聚焦状态，默认有，点击时候移除；弹出框关闭后重新添加
     };
   },
   filters: {
@@ -147,12 +148,14 @@ export default {
   },
   methods: {
     join() {
+      // 手动取消按钮聚焦, 聚焦主要用于电视遥控选择时有参照
+      this.focusState = false;
       let that = this;
       // 判断不再应用中时候的处理，唤醒客户端
       if (window.android) {
-        window.android.joinMeeting(that.data.id);
-      } else if (window.joinMeeting) {
-        window.joinMeeting(that.data.id);
+        window.android.startMeeting(that.data.id);
+      } else if (window.startMeeting) {
+        window.startMeeting(that.data.id);
       } else {
         const lib = new CallApp(this.option);
         lib.open({
@@ -243,6 +246,8 @@ export default {
       });
     },
     startMeeting() {
+      // 手动移除聚焦
+      this.focusState = false;
       // 判断不再应用中时候的处理，唤醒客户端
       let that = this;
       if (window.android) {
@@ -265,11 +270,14 @@ export default {
       }
     },
     cancelMeeting(meetingId) {
+      // 取消按钮聚焦
+      this.focusState = false;
       let that = this;
       this.$dialog({
         title: "取消预约",
         content: "你正在取消会议操作，确定取消会议吗？",
         customClass: "dialog",
+        closeOnClickModal: false, // 点击蒙版不关闭对话框
         onOkBtn() {
           //确定按钮点击事件
           delMeet(meetingId).then(res => {
@@ -294,6 +302,8 @@ export default {
     },
     switchActionSheet() {
       this.isVisible = !this.isVisible;
+      // 手动触发聚焦
+      this.focusState = true;
     },
     openShare() {
       this.isVisible = true;
@@ -320,6 +330,7 @@ export default {
            */
           getPocUserInfo().then(res => {
             // 状态处理 ： 当前登录用户是否主持人
+            this.$store.commit("setUserId", res.data.data.uid);
             if (res.data.data.tel === this.data.participantInfoDOS[0].tel) {
               this.isHost = true;
             } else {
@@ -336,14 +347,14 @@ export default {
     this.meetingId = this.$route.params.id;
     this.getInfo(this.meetingId);
     this.wxShare();
-    this.$nextTick(() => {
-      this.scroll = new Bscroll(this.$refs.wrapper, {
-        mouseWheel: true,
-        click: true,
-        disableMouse: false, // 默认自动判断环境移动端和pc端
-        tap: true
-      });
-    });
+    // this.$nextTick(() => {
+    //   this.scroll = new Bscroll(this.$refs.wrapper, {
+    //     mouseWheel: true,
+    //     click: true,
+    //     disableMouse: false, // 默认自动判断环境移动端和pc端
+    //     tap: true
+    //   });
+    // });
   }
 };
 </script>

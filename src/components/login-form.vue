@@ -19,7 +19,7 @@
     </div>
     <nut-button
       @click="loginIn"
-      class="login-btn"
+      @blur="true"
       type="primary"
       block
       shape="circle"
@@ -39,7 +39,8 @@ export default {
       loginForm: {
         userName: "",
         password: ""
-      }
+      },
+      btnState: true
     };
   },
   methods: {

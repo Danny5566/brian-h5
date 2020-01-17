@@ -80,13 +80,13 @@ export default [
       title: "错误"
     },
     component: () => import("@/views/error.vue")
+  },
+  {
+    path: "/test",
+    name: "test",
+    meta: {
+      title: "测试"
+    },
+    component: () => import("@/views/test.vue")
   }
-  // ,{
-  //   path: "/test",
-  //   name: "test",
-  //   meta: {
-  //     title: "测试"
-  //   },
-  //   component: () => import("@/views/test.vue")
-  // }
 ];

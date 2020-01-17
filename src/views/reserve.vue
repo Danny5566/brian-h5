@@ -126,7 +126,6 @@ import Bscroll from "better-scroll";
 import lcTitle from "_/title.vue";
 import userList from "_/user-list.vue";
 import { parseTime, getWeek, getDateDiff } from "@/libs/tools";
-// eslint-disable-next-line no-unused-vars
 import { addMeeting } from "@/api/data";
 
 export default {

@@ -29,6 +29,7 @@
               <loading v-show="up"></loading>
               <div
                 class="nut-vert-list-item"
+                style="cursor: pointer;"
                 v-for="(item, index) of currentData"
                 :key="index"
               >
@@ -51,6 +52,7 @@
               <loading v-show="up"></loading>
               <div
                 class="nut-vert-list-item"
+                style="cursor: pointer;"
                 v-for="(item, index) of historyData"
                 :key="index"
               >
@@ -177,11 +179,13 @@ export default {
     this.getHisPage();
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.wrapper, {
+        mouseWheel: true,
         click: true,
+        tap: true,
+        disableMouse: false,
         probeType: 2,
         pullDownRefresh: true,
-        pullUpLoad: true,
-        mouseWheel: true
+        pullUpLoad: true
       });
       this.scroll.on("scroll", pos => {
         if (pos.y < this.scroll.maxScrollY - 40 && !this.curEnd) {
@@ -216,10 +220,12 @@ export default {
         }
       });
       this.scroll2 = new Bscroll(this.$refs.wrapper2, {
+        mouseWheel: true,
         click: true,
+        tap: true,
+        disableMouse: false,
         pullDownRefresh: true,
-        pullUpLoad: true,
-        mouseWheel: true
+        pullUpLoad: true
       });
       this.scroll2.on("scroll", pos => {
         if (pos.y < this.scroll2.maxScrollY - 40 && !this.historyEnd) {

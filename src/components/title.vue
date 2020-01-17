@@ -1,30 +1,36 @@
 /* eslint-disable no-undef */
 <template>
-  <nut-navbar
-    :leftShow="data.back"
-    :rightShow="data.avatar || data.share"
-    style="height: 44px; line-height: 44px;"
-    @on-click-back="back"
-    class="navbar"
-  >
-    {{ data.title }}
-    <span v-if="userLength">({{ userLength }})</span>
-    <a v-if="data.avatar" slot="more-icon">
-      <nut-avatar
-        @activeAvatar="showAbout"
-        :bgIcon="bgIcon"
-        :bgImage="
-          this.$store.state.user.avatarImgPath
-            ? this.$store.state.user.avatarImgPath
-            : require('@/assets/images/avatar-select.png')
-        "
-      ></nut-avatar>
-    </a>
-    <a v-if="data.share" slot="more-icon" @click="share">分享</a>
-  </nut-navbar>
+  <div>
+    <nut-navbar
+      :leftShow="data.back"
+      :rightShow="data.avatar || data.share"
+      style="height: 44px; line-height: 44px;"
+      @on-click-back="back"
+      @on-click-more="share"
+      class="navbar"
+    >
+      {{ data.title }}
+      <span v-if="userLength">({{ userLength }})</span>
+      <a v-if="data.avatar" slot="more-icon">
+        <nut-avatar
+          @activeAvatar="showAbout"
+          :bgIcon="bgIcon"
+          :bgImage="
+            this.$store.state.user.avatarImgPath
+              ? this.$store.state.user.avatarImgPath
+              : require('@/assets/images/avatar-select.png')
+          "
+        ></nut-avatar>
+      </a>
+      <a v-if="data.share" slot="more-icon">分享</a>
+    </nut-navbar>
+  </div>
 </template>
 
 <script>
+/**
+ * 电视聚焦状态navbar的title，直接去源码中移除了点击事件
+ */
 export default {
   name: "lc-title",
   props: ["userLength"],
